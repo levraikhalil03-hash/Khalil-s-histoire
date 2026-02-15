@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Khalil's Histoire</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="space-bg"></div>
+    <div class="stars" aria-hidden="true"></div>
+
+    <header class="topbar glass">
+      <h1>Khalil's Histoire</h1>
+      <button id="postStoryBtn" class="btn btn-primary">Poster une histoire</button>
+    </header>
+
+    <main class="layout">
+      <nav class="tabs glass" role="tablist" aria-label="Sections">
+        <button class="tab is-active" data-tab="home" role="tab" aria-selected="true">Accueil</button>
+        <button class="tab" data-tab="account" role="tab" aria-selected="false">Mon compte</button>
+        <button class="tab" data-tab="my-stories" role="tab" aria-selected="false">Mes histoires</button>
+      </nav>
+
+      <section id="home" class="panel glass is-visible" role="tabpanel">
+        <h2>Toutes les histoires</h2>
+        <p class="muted">Toutes les histoires postées par les utilisateurs apparaissent ici en temps réel.</p>
+        <div id="allStories" class="story-list"></div>
+      </section>
+
+      <section id="account" class="panel glass" role="tabpanel">
+        <h2>Votre compte</h2>
+        <div id="accountCard" class="account-card muted">Connectez-vous pour voir votre profil.</div>
+      </section>
+
+      <section id="my-stories" class="panel glass" role="tabpanel">
+        <h2>Vos histoires</h2>
+        <div id="myStories" class="story-list"></div>
+      </section>
+    </main>
+
+    <dialog id="authDialog" class="modal">
+      <form method="dialog" class="modal-content">
+        <h3>Connectez-vous</h3>
+        <p>Connectez-vous avec votre adresse email Google pour poster une histoire.</p>
+        <button id="googleLoginBtn" type="button" class="btn btn-primary">Se connecter avec Google</button>
+        <button class="btn btn-ghost" type="submit">Fermer</button>
+      </form>
+    </dialog>
+
+    <dialog id="profileDialog" class="modal">
+      <form id="profileForm" class="modal-content">
+        <h3>Finaliser votre profil</h3>
+        <label>
+          Mot de passe (pour ce site)
+          <input id="profilePassword" type="password" required minlength="4" />
+        </label>
+        <label>
+          Bio
+          <textarea id="profileBio" rows="4" placeholder="Parlez un peu de vous..."></textarea>
+        </label>
+        <button class="btn btn-primary" type="submit">Enregistrer</button>
+      </form>
+    </dialog>
+
+    <dialog id="storyDialog" class="modal">
+      <form id="storyForm" class="modal-content">
+        <h3>Nouvelle histoire</h3>
+        <label>
+          Titre
+          <input id="storyTitle" required maxlength="120" />
+        </label>
+        <label>
+          Histoire
+          <textarea id="storyContent" required rows="10" placeholder="Écrivez votre histoire..."></textarea>
+        </label>
+        <menu>
+          <button class="btn btn-primary" type="submit">Publier</button>
+          <button id="cancelStoryBtn" class="btn btn-ghost" type="button">Annuler</button>
+        </menu>
+      </form>
+    </dialog>
+
+    <script>
+      window.__FIREBASE_CONFIG__ = window.__FIREBASE_CONFIG__ || null;
+    </script>
+    <script type="module" src="app.js"></script>
+  </body>
+</html>
