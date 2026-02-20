@@ -2,33 +2,22 @@
 
 Application web en français pour publier des histoires avec une ambiance spatiale nébuleuse.
 
-## Fonctionnalités
+## Fonctionnalités (nouvelle logique)
 
-- **Connexion sans Gmail**: uniquement avec **pseudo + mot de passe**.
-- **Accueil**: affiche toutes les histoires des utilisateurs en temps réel.
-- **Mon compte**: pseudo, mot de passe, bio, bouton déconnexion.
-- **Mes histoires**: seulement les histoires publiées par l'utilisateur connecté.
-- Bouton **Poster une histoire** en haut:
-  - si non connecté, affiche la connexion,
-  - si connecté, ouvre directement le formulaire.
-- **J'aime**: chaque utilisateur peut mettre/enlever son like une seule fois par histoire.
+- **Plus de bouton de connexion en haut** : en haut il y a seulement **Poster une histoire**.
+- Si vous cliquez sur **Poster une histoire** sans être connecté, la fenêtre de connexion s'ouvre.
+- Connexion et création de compte avec **pseudo + mot de passe** uniquement.
+- **Accueil** : toutes les histoires de tous les comptes (synchro globale en temps réel avec Firebase).
+- **Mon compte** : pseudo, mot de passe, bio, déconnexion + affichage des histoires personnelles.
+- **Mes histoires** : filtre des histoires publiées par le compte connecté.
+- **J'aime** : 1 like par compte et par histoire (clic = like/unlike).
+- Après publication d'une histoire, un emoji **🎉** s'affiche pendant **0,70 seconde**.
 
-## Synchronisation entre appareils
+## Synchronisation Firebase
 
-- En mode Firebase, toutes les histoires et les likes sont synchronisés en temps réel entre tous les comptes et tous les appareils.
-- Si vous ouvrez le site sur téléphone, vous verrez aussi les histoires postées ailleurs.
+Quand la configuration Firebase est fournie, tous les comptes voient les mêmes histoires et les mêmes likes en temps réel.
 
-## Lancer localement
-
-```bash
-python3 -m http.server 4173
-```
-
-Puis ouvrez `http://localhost:4173`.
-
-## Configuration Firebase (recommandé pour la synchro multi-appareils)
-
-Pour activer la synchronisation en temps réel globale, ajoutez votre config Firebase dans `index.html`:
+Ajoutez la config dans `index.html`:
 
 ```html
 <script>
@@ -43,9 +32,17 @@ Pour activer la synchronisation en temps réel globale, ajoutez votre config Fir
 </script>
 ```
 
-Ensuite, créez dans Firestore:
+Collections Firestore utilisées:
 
-- collection `profiles` (comptes pseudo/mot de passe),
-- collection `stories` (histoires + likes).
+- `profiles` (profil pseudo/mot de passe/bio)
+- `stories` (histoires + likedBy)
 
-> Sans Firebase, l'app fonctionne en mode local (`localStorage`) mais la synchronisation sera limitée au navigateur local.
+## Lancer localement
+
+```bash
+python3 -m http.server 4173
+```
+
+Puis ouvrez `http://localhost:4173`.
+
+> Sans Firebase, l'app fonctionne en localStorage (démonstration locale uniquement).
