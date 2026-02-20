@@ -68,13 +68,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
   padding: 0.9rem 1.5rem;
-}
-
-.topbar-actions {
-  display: flex;
-  gap: 0.6rem;
 }
 
 .layout {
@@ -136,20 +130,12 @@ body {
   font-size: 0.9rem;
 }
 
-.like-btn {
-  margin-top: 0.6rem;
-}
-
-.like-btn.is-liked {
-  background: rgba(255, 123, 184, 0.25);
-  border-color: rgba(255, 153, 205, 0.5);
-}
-
 .account-card {
   border: 1px solid var(--border);
   border-radius: 1rem;
   padding: 1rem;
   background: rgba(21, 27, 56, 0.55);
+  margin-bottom: 1rem;
 }
 
 .profile-head {
@@ -173,6 +159,7 @@ body {
 .account-actions {
   display: flex;
   gap: 0.6rem;
+  margin-top: 0.7rem;
 }
 
 .glass {
@@ -209,6 +196,11 @@ body {
 
 .btn-ghost {
   background: transparent;
+}
+
+.like-btn.is-liked {
+  background: rgba(255, 123, 184, 0.25);
+  border-color: rgba(255, 153, 205, 0.5);
 }
 
 .modal {
@@ -252,4 +244,27 @@ menu {
   display: flex;
   gap: 0.6rem;
   justify-content: flex-end;
+}
+
+.publish-emoji {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 1.8rem;
+  background: rgba(13, 20, 43, 0.85);
+  border: 1px solid var(--border);
+  opacity: 0;
+  transform: scale(0.7);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  pointer-events: none;
+}
+
+.publish-emoji.is-visible {
+  opacity: 1;
+  transform: scale(1);
 }
