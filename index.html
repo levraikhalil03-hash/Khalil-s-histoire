@@ -12,7 +12,10 @@
 
     <header class="topbar glass">
       <h1>Khalil's Histoire</h1>
-      <button id="postStoryBtn" class="btn btn-primary">Poster une histoire</button>
+      <div class="topbar-actions">
+        <button id="openAuthBtn" class="btn btn-ghost">Connexion</button>
+        <button id="postStoryBtn" class="btn btn-primary">Poster une histoire</button>
+      </div>
     </header>
 
     <main class="layout">
@@ -40,21 +43,28 @@
     </main>
 
     <dialog id="authDialog" class="modal">
-      <form method="dialog" class="modal-content">
+      <form id="authForm" class="modal-content">
         <h3>Connectez-vous</h3>
-        <p>Connectez-vous avec votre adresse email Google pour poster une histoire.</p>
-        <button id="googleLoginBtn" type="button" class="btn btn-primary">Se connecter avec Google</button>
-        <button class="btn btn-ghost" type="submit">Fermer</button>
+        <label>
+          Pseudo
+          <input id="authUsername" required minlength="3" maxlength="32" />
+        </label>
+        <label>
+          Mot de passe
+          <input id="authPassword" type="password" required minlength="4" maxlength="64" />
+        </label>
+        <p id="authError" class="error" role="alert"></p>
+        <menu>
+          <button id="loginBtn" class="btn btn-primary" type="submit">Se connecter</button>
+          <button id="registerBtn" class="btn btn-ghost" type="button">Créer un compte</button>
+          <button id="closeAuthBtn" class="btn btn-ghost" type="button">Fermer</button>
+        </menu>
       </form>
     </dialog>
 
     <dialog id="profileDialog" class="modal">
       <form id="profileForm" class="modal-content">
-        <h3>Finaliser votre profil</h3>
-        <label>
-          Mot de passe (pour ce site)
-          <input id="profilePassword" type="password" required minlength="4" />
-        </label>
+        <h3>Votre bio</h3>
         <label>
           Bio
           <textarea id="profileBio" rows="4" placeholder="Parlez un peu de vous..."></textarea>
