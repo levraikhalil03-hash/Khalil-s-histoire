@@ -12,10 +12,7 @@
 
     <header class="topbar glass">
       <h1>Khalil's Histoire</h1>
-      <div class="topbar-actions">
-        <button id="openAuthBtn" class="btn btn-ghost">Connexion</button>
-        <button id="postStoryBtn" class="btn btn-primary">Poster une histoire</button>
-      </div>
+      <button id="postStoryBtn" class="btn btn-primary">Poster une histoire</button>
     </header>
 
     <main class="layout">
@@ -32,12 +29,14 @@
       </section>
 
       <section id="account" class="panel glass" role="tabpanel">
-        <h2>Votre compte</h2>
-        <div id="accountCard" class="account-card muted">Connectez-vous pour voir votre profil.</div>
+        <h2>Mon compte</h2>
+        <div id="accountCard" class="account-card"></div>
+        <h3>Mes histoires publiées</h3>
+        <div id="accountStories" class="story-list"></div>
       </section>
 
       <section id="my-stories" class="panel glass" role="tabpanel">
-        <h2>Vos histoires</h2>
+        <h2>Mes histoires</h2>
         <div id="myStories" class="story-list"></div>
       </section>
     </main>
@@ -55,21 +54,10 @@
         </label>
         <p id="authError" class="error" role="alert"></p>
         <menu>
-          <button id="loginBtn" class="btn btn-primary" type="submit">Se connecter</button>
+          <button class="btn btn-primary" type="submit">Se connecter</button>
           <button id="registerBtn" class="btn btn-ghost" type="button">Créer un compte</button>
           <button id="closeAuthBtn" class="btn btn-ghost" type="button">Fermer</button>
         </menu>
-      </form>
-    </dialog>
-
-    <dialog id="profileDialog" class="modal">
-      <form id="profileForm" class="modal-content">
-        <h3>Votre bio</h3>
-        <label>
-          Bio
-          <textarea id="profileBio" rows="4" placeholder="Parlez un peu de vous..."></textarea>
-        </label>
-        <button class="btn btn-primary" type="submit">Enregistrer</button>
       </form>
     </dialog>
 
@@ -90,6 +78,8 @@
         </menu>
       </form>
     </dialog>
+
+    <div id="publishEmoji" class="publish-emoji" aria-live="polite">🎉</div>
 
     <script>
       window.__FIREBASE_CONFIG__ = window.__FIREBASE_CONFIG__ || null;
