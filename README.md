@@ -10,9 +10,14 @@ Application web en français pour publier des histoires avec une ambiance spatia
 - **Accueil** : toutes les histoires de tous les comptes (synchro globale en temps réel avec Firebase).
 - **Mon compte** : pseudo, mot de passe, bio, déconnexion + affichage des histoires personnelles.
 - **Mes histoires** : filtre des histoires publiées par le compte connecté.
-- **J'aime** : 1 like par compte et par histoire (clic = like/unlike).
+- **J'aime** : un simple emoji ❤️ (sans compteur), qui devient rouge au clic ; 1 like par compte et par histoire.
 - **Suppression** : un utilisateur peut supprimer **uniquement ses propres histoires** via un bouton `X` + confirmation.
 - Après publication d'une histoire, un emoji **🎉** s'affiche pendant **0,70 seconde**.
+
+## Réinitialisation des anciennes histoires
+
+- Le site redémarre sur une nouvelle base d'histoires (collection `stories_fresh_start` et stockage local `kh_stories_fresh_start`).
+- Les anciennes histoires ne sont plus chargées dans cette nouvelle version.
 
 ## Synchronisation Firebase
 
@@ -36,7 +41,7 @@ Ajoutez la config dans `index.html`:
 Collections Firestore utilisées:
 
 - `profiles` (profil pseudo/mot de passe/bio)
-- `stories` (histoires + likedBy)
+- `stories_fresh_start` (histoires + likedBy)
 
 ## Lancer localement
 
