@@ -213,9 +213,13 @@ body {
   background: transparent;
 }
 
+.like-btn {
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
 .like-btn.is-liked {
-  background: rgba(255, 123, 184, 0.25);
-  border-color: rgba(255, 153, 205, 0.5);
+  color: #ff4d7d;
 }
 
 .modal {
@@ -282,4 +286,14 @@ menu {
 .publish-emoji.is-visible {
   opacity: 1;
   transform: scale(1);
+}
+
+.is-hidden {
+  display: none;
+}
+
+.site-license {
+  text-align: center;
+  padding: 0.6rem 1rem 1.2rem;
+  font-size: 0.9rem;
 }
