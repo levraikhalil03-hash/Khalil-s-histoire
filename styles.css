@@ -120,9 +120,24 @@ body {
   background: rgba(19, 26, 53, 0.5);
 }
 
-.story-card h3 {
+.story-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 0.6rem;
+}
+
+.story-head h3 {
   margin: 0 0 0.4rem;
 }
+
+.delete-btn {
+  min-width: 32px;
+  height: 32px;
+  padding: 0;
+  font-weight: 700;
+}
+
 
 .story-meta {
   margin: 0 0 0.6rem;
