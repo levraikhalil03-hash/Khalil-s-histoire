@@ -11,6 +11,7 @@ Application web en français pour publier des histoires avec une ambiance spatia
 - **Mon compte** : pseudo, mot de passe, bio, déconnexion + affichage des histoires personnelles.
 - **Mes histoires** : filtre des histoires publiées par le compte connecté.
 - **J'aime** : 1 like par compte et par histoire (clic = like/unlike).
+- **Suppression** : un utilisateur peut supprimer **uniquement ses propres histoires** via un bouton `X` + confirmation.
 - Après publication d'une histoire, un emoji **🎉** s'affiche pendant **0,70 seconde**.
 
 ## Synchronisation Firebase
@@ -46,3 +47,4 @@ python3 -m http.server 4173
 Puis ouvrez `http://localhost:4173`.
 
 > Sans Firebase, l'app fonctionne en localStorage (démonstration locale uniquement).
+app.js
