@@ -2,6 +2,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebas
 import {
   addDoc,
   collection,
+  deleteDoc,
   doc,
   getDoc,
   getFirestore,
@@ -18,6 +19,7 @@ const state = {
   stories: [],
   profile: null,
   useLocalMode: !window.__FIREBASE_CONFIG__,
+  storyToDelete: null,
 };
 
 let db;
@@ -37,6 +39,9 @@ const closeAuthBtn = document.getElementById("closeAuthBtn");
 const storyDialog = document.getElementById("storyDialog");
 const storyForm = document.getElementById("storyForm");
 const cancelStoryBtn = document.getElementById("cancelStoryBtn");
+const deleteDialog = document.getElementById("deleteDialog");
+const confirmDeleteBtn = document.getElementById("confirmDeleteBtn");
+const cancelDeleteBtn = document.getElementById("cancelDeleteBtn");
 const allStoriesEl = document.getElementById("allStories");
 const myStoriesEl = document.getElementById("myStories");
 const accountCard = document.getElementById("accountCard");
@@ -66,6 +71,21 @@ postStoryBtn.addEventListener("click", () => {
 
 closeAuthBtn.addEventListener("click", () => authDialog.close());
 cancelStoryBtn.addEventListener("click", () => storyDialog.close());
+cancelDeleteBtn.addEventListener("click", () => {
+  state.storyToDelete = null;
+  deleteDialog.close();
+});
+
+confirmDeleteBtn.addEventListener("click", async () => {
+  if (!state.storyToDelete) {
+    deleteDialog.close();
+    return;
+  }
+
+  await deleteStory(state.storyToDelete);
+  state.storyToDelete = null;
+  deleteDialog.close();
+});
 
 authForm.addEventListener("submit", async (event) => {
   event.preventDefault();
@@ -114,23 +134,68 @@ storyForm.addEventListener("submit", async (event) => {
   storyDialog.close();
 });
 
-allStoriesEl.addEventListener("click", async (event) => {
-  const btn = event.target.closest("button[data-like-id]");
-  if (!btn) return;
-  await toggleLike(btn.dataset.likeId);
-});
+function attachStoryListEvents(container) {
+  container.addEventListener("click", async (event) => {
+    const likeBtn = event.target.closest("button[data-like-id]");
+    if (likeBtn) {
+      await toggleLike(likeBtn.dataset.likeId);
+      return;
+    }
 
-myStoriesEl.addEventListener("click", async (event) => {
-  const btn = event.target.closest("button[data-like-id]");
-  if (!btn) return;
-  await toggleLike(btn.dataset.likeId);
-});
+    const deleteBtn = event.target.closest("button[data-delete-id]");
+    if (deleteBtn) {
+      requestDelete(deleteBtn.dataset.deleteId);
+    }
+  });
+}
 
-accountStoriesEl.addEventListener("click", async (event) => {
-  const btn = event.target.closest("button[data-like-id]");
-  if (!btn) return;
-  await toggleLike(btn.dataset.likeId);
-});
+attachStoryListEvents(allStoriesEl);
+attachStoryListEvents(myStoriesEl);
+attachStoryListEvents(accountStoriesEl);
+
+function requestDelete(storyId) {
+  if (!state.user) {
+    authDialog.showModal();
+    return;
+  }
+
+  const story = state.stories.find((item) => item.id === storyId);
+  if (!story || story.uid !== state.user.id) {
+    return;
+  }
+
+  state.storyToDelete = storyId;
+  deleteDialog.showModal();
+}
+
+async function deleteStory(storyId) {
+  if (!state.user) return;
+
+  if (state.useLocalMode) {
+    const stories = JSON.parse(localStorage.getItem("kh_stories") || "[]");
+    const target = stories.find((story) => story.id === storyId);
+    if (!target || target.uid !== state.user.id) {
+      return;
+    }
+
+    const filtered = stories.filter((story) => story.id !== storyId);
+    localStorage.setItem("kh_stories", JSON.stringify(filtered));
+    state.stories = filtered.sort((a, b) => b.createdAt - a.createdAt);
+    renderStories();
+    return;
+  }
+
+  const ref = doc(db, "stories", storyId);
+  const snap = await getDoc(ref);
+  if (!snap.exists()) return;
+
+  const data = snap.data();
+  if (data.uid !== state.user.id) {
+    return;
+  }
+
+  await deleteDoc(ref);
+}
 
 async function login() {
   authError.textContent = "";
@@ -295,10 +360,18 @@ async function saveBio(bio) {
 function storyTemplate(story) {
   const likedBy = story.likedBy || [];
   const liked = state.user ? likedBy.includes(state.user.id) : false;
+  const canDelete = state.user && story.uid === state.user.id;
 
   return `
     <article class="story-card">
-      <h3>${escapeHtml(story.title)}</h3>
+      <div class="story-head">
+        <h3>${escapeHtml(story.title)}</h3>
+        ${
+          canDelete
+            ? `<button class="btn delete-btn" data-delete-id="${story.id}" title="Supprimer cette histoire" aria-label="Supprimer cette histoire">X</button>`
+            : ""
+        }
+      </div>
       <p class="story-meta">Par ${escapeHtml(story.authorUsername)} · ${formatDate(story.createdAt)}</p>
       <p>${escapeHtml(story.content).replace(/\n/g, "<br>")}</p>
       <button class="btn like-btn ${liked ? "is-liked" : ""}" data-like-id="${story.id}">
