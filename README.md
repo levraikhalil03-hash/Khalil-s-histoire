@@ -10,18 +10,9 @@ Application web en français pour publier des histoires avec une ambiance spatia
 - **Accueil** : toutes les histoires de tous les comptes (synchro globale en temps réel avec Firebase).
 - **Mon compte** : pseudo, mot de passe, bio, déconnexion + affichage des histoires personnelles.
 - **Mes histoires** : filtre des histoires publiées par le compte connecté.
-- **J'aime** : un simple emoji ❤️ (sans compteur), qui devient rouge au clic ; 1 like par compte et par histoire.
+- **J'aime** : 1 like par compte et par histoire (clic = like/unlike).
 - **Suppression** : un utilisateur peut supprimer **uniquement ses propres histoires** via un bouton `X` + confirmation.
-- **Compte auteur volontaire** : si vous tentez `KTB` / `MY`, un bouton `Ou bien être volontaire` apparaît.
-  - Question: `Quelle est la métier de tes rêves ?`
-  - Réponse attendue: commence par `Astronaute de la mer` (texte additionnel accepté).
-  - Si correct: message `Bienvenue, auteur` et droits de modération (suppression de toutes les histoires + vider les likes).
 - Après publication d'une histoire, un emoji **🎉** s'affiche pendant **0,70 seconde**.
-
-## Réinitialisation des anciennes histoires
-
-- Le site redémarre sur une nouvelle base d'histoires (collection `stories_fresh_start` et stockage local `kh_stories_fresh_start`).
-- Les anciennes histoires ne sont plus chargées dans cette nouvelle version.
 
 ## Synchronisation Firebase
 
@@ -45,7 +36,7 @@ Ajoutez la config dans `index.html`:
 Collections Firestore utilisées:
 
 - `profiles` (profil pseudo/mot de passe/bio)
-- `stories_fresh_start` (histoires + likedBy)
+- `stories` (histoires + likedBy)
 
 ## Lancer localement
 
@@ -56,8 +47,3 @@ python3 -m http.server 4173
 Puis ouvrez `http://localhost:4173`.
 
 > Sans Firebase, l'app fonctionne en localStorage (démonstration locale uniquement).
-
-
-## Licence
-
-- Contact/licence: `inconnudesasc@gmail.com`
