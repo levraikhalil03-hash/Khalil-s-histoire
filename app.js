@@ -22,6 +22,12 @@ const state = {
   storyToDelete: null,
 };
 
+const STORIES_COLLECTION = "stories_fresh_start";
+const STORIES_STORAGE_KEY = "kh_stories_fresh_start";
+const AUTHOR_USERNAME = "KTB";
+const AUTHOR_PASSWORD = "MY";
+const AUTHOR_SECRET = "astronaute de la mer";
+
 let db;
 if (!state.useLocalMode) {
   const app = initializeApp(window.__FIREBASE_CONFIG__);
@@ -35,6 +41,7 @@ const authDialog = document.getElementById("authDialog");
 const authForm = document.getElementById("authForm");
 const authError = document.getElementById("authError");
 const registerBtn = document.getElementById("registerBtn");
+const volunteerBtn = document.getElementById("volunteerBtn");
 const closeAuthBtn = document.getElementById("closeAuthBtn");
 const storyDialog = document.getElementById("storyDialog");
 const storyForm = document.getElementById("storyForm");
@@ -96,6 +103,10 @@ registerBtn.addEventListener("click", async () => {
   await register();
 });
 
+volunteerBtn.addEventListener("click", () => {
+  loginAsAuthorVolunteer();
+});
+
 storyForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   if (!state.user) return;
@@ -105,7 +116,7 @@ storyForm.addEventListener("submit", async (event) => {
   if (!title || !content) return;
 
   if (state.useLocalMode) {
-    const stories = JSON.parse(localStorage.getItem("kh_stories") || "[]");
+    const stories = JSON.parse(localStorage.getItem(STORIES_STORAGE_KEY) || "[]");
     stories.push({
       id: crypto.randomUUID(),
       title,
@@ -115,11 +126,11 @@ storyForm.addEventListener("submit", async (event) => {
       createdAt: Date.now(),
       likedBy: [],
     });
-    localStorage.setItem("kh_stories", JSON.stringify(stories));
+    localStorage.setItem(STORIES_STORAGE_KEY, JSON.stringify(stories));
     state.stories = stories.sort((a, b) => b.createdAt - a.createdAt);
     renderStories();
   } else {
-    await addDoc(collection(db, "stories"), {
+    await addDoc(collection(db, STORIES_COLLECTION), {
       title,
       content,
       uid: state.user.id,
@@ -145,6 +156,12 @@ function attachStoryListEvents(container) {
     const deleteBtn = event.target.closest("button[data-delete-id]");
     if (deleteBtn) {
       requestDelete(deleteBtn.dataset.deleteId);
+      return;
+    }
+
+    const clearLikesBtn = event.target.closest("button[data-clear-likes-id]");
+    if (clearLikesBtn) {
+      await clearLikes(clearLikesBtn.dataset.clearLikesId);
     }
   });
 }
@@ -172,25 +189,25 @@ async function deleteStory(storyId) {
   if (!state.user) return;
 
   if (state.useLocalMode) {
-    const stories = JSON.parse(localStorage.getItem("kh_stories") || "[]");
+    const stories = JSON.parse(localStorage.getItem(STORIES_STORAGE_KEY) || "[]");
     const target = stories.find((story) => story.id === storyId);
-    if (!target || target.uid !== state.user.id) {
+    if (!target || (target.uid !== state.user.id && state.user.role !== "author")) {
       return;
     }
 
     const filtered = stories.filter((story) => story.id !== storyId);
-    localStorage.setItem("kh_stories", JSON.stringify(filtered));
+    localStorage.setItem(STORIES_STORAGE_KEY, JSON.stringify(filtered));
     state.stories = filtered.sort((a, b) => b.createdAt - a.createdAt);
     renderStories();
     return;
   }
 
-  const ref = doc(db, "stories", storyId);
+  const ref = doc(db, STORIES_COLLECTION, storyId);
   const snap = await getDoc(ref);
   if (!snap.exists()) return;
 
   const data = snap.data();
-  if (data.uid !== state.user.id) {
+  if (data.uid !== state.user.id && state.user.role !== "author") {
     return;
   }
 
@@ -199,6 +216,7 @@ async function deleteStory(storyId) {
 
 async function login() {
   authError.textContent = "";
+  volunteerBtn.classList.add("is-hidden");
   const username = document.getElementById("authUsername").value.trim();
   const password = document.getElementById("authPassword").value.trim();
   if (!username || !password) {
@@ -208,6 +226,12 @@ async function login() {
 
   const id = normalizeId(username);
 
+  if (username === AUTHOR_USERNAME && password === AUTHOR_PASSWORD) {
+    authError.textContent = "Soit essayez un autre pseudo et mot de passe, soit utilisez "Ou bien être volontaire".";
+    volunteerBtn.classList.remove("is-hidden");
+    return;
+  }
+
   if (state.useLocalMode) {
     const users = JSON.parse(localStorage.getItem("kh_users") || "{}");
     const user = users[id];
@@ -216,8 +240,8 @@ async function login() {
       return;
     }
 
-    setSession({ id, username: user.username });
-    state.user = { id, username: user.username };
+    setSession({ id, username: user.username, role: "user" });
+    state.user = { id, username: user.username, role: "user" };
     state.profile = user;
     authDialog.close();
     renderAccount();
@@ -237,8 +261,8 @@ async function login() {
     return;
   }
 
-  setSession({ id, username: profile.username });
-  state.user = { id, username: profile.username };
+  setSession({ id, username: profile.username, role: "user" });
+  state.user = { id, username: profile.username, role: "user" };
   state.profile = profile;
   authDialog.close();
   renderAccount();
@@ -247,6 +271,7 @@ async function login() {
 
 async function register() {
   authError.textContent = "";
+  volunteerBtn.classList.add("is-hidden");
   const username = document.getElementById("authUsername").value.trim();
   const password = document.getElementById("authPassword").value.trim();
   if (!username || !password) {
@@ -269,8 +294,8 @@ async function register() {
 
     users[id] = { username, password, bio: "" };
     localStorage.setItem("kh_users", JSON.stringify(users));
-    setSession({ id, username });
-    state.user = { id, username };
+    setSession({ id, username, role: "user" });
+    state.user = { id, username, role: "user" };
     state.profile = users[id];
     authDialog.close();
     renderAccount();
@@ -288,8 +313,8 @@ async function register() {
   const profile = { username, password, bio: "", createdAt: serverTimestamp() };
   await setDoc(ref, profile);
 
-  setSession({ id, username });
-  state.user = { id, username };
+  setSession({ id, username, role: "user" });
+  state.user = { id, username, role: "user" };
   state.profile = profile;
   authDialog.close();
   renderAccount();
@@ -315,6 +340,7 @@ function renderAccount() {
       <div class="avatar">${escapeHtml(state.user.username[0]?.toUpperCase() || "U")}</div>
       <div>
         <p><strong>Pseudo:</strong> ${escapeHtml(state.user.username)}</p>
+        <p><strong>Rôle:</strong> ${state.user.role === "author" ? "Auteur" : "Utilisateur"}</p>
         <p><strong>Mot de passe:</strong> ${escapeHtml(password)}</p>
         <p><strong>Bio:</strong> ${escapeHtml(bio)}</p>
       </div>
@@ -340,6 +366,45 @@ function renderAccount() {
   });
 }
 
+function loginAsAuthorVolunteer() {
+  const answer = window.prompt("Quelle est la métier de tes rêves ?");
+  if (answer === null) return;
+
+  const cleaned = answer.trim().toLowerCase();
+  if (!cleaned.startsWith(AUTHOR_SECRET)) {
+    window.alert("Vous n'êtes pas d'auteur. Essayez un autre mot de passe.");
+    return;
+  }
+
+  const id = normalizeId(AUTHOR_USERNAME);
+  state.user = { id, username: AUTHOR_USERNAME, role: "author" };
+  state.profile = { username: AUTHOR_USERNAME, password: AUTHOR_PASSWORD, bio: "Auteur volontaire" };
+  setSession({ id, username: AUTHOR_USERNAME, role: "author" });
+  authDialog.close();
+  volunteerBtn.classList.add("is-hidden");
+  window.alert("Bienvenue, auteur");
+  renderAccount();
+  renderStories();
+}
+
+async function clearLikes(storyId) {
+  if (!state.user || state.user.role !== "author") return;
+
+  if (state.useLocalMode) {
+    const stories = JSON.parse(localStorage.getItem(STORIES_STORAGE_KEY) || "[]");
+    const index = stories.findIndex((s) => s.id === storyId);
+    if (index < 0) return;
+    stories[index].likedBy = [];
+    localStorage.setItem(STORIES_STORAGE_KEY, JSON.stringify(stories));
+    state.stories = stories.sort((a, b) => b.createdAt - a.createdAt);
+    renderStories();
+    return;
+  }
+
+  const ref = doc(db, STORIES_COLLECTION, storyId);
+  await setDoc(ref, { likedBy: [] }, { merge: true });
+}
+
 async function saveBio(bio) {
   if (!state.user) return;
 
@@ -360,7 +425,8 @@ async function saveBio(bio) {
 function storyTemplate(story) {
   const likedBy = story.likedBy || [];
   const liked = state.user ? likedBy.includes(state.user.id) : false;
-  const canDelete = state.user && story.uid === state.user.id;
+  const canDelete = state.user && (story.uid === state.user.id || state.user.role === "author");
+  const canModerateLikes = state.user && state.user.role === "author";
 
   return `
     <article class="story-card">
@@ -374,8 +440,9 @@ function storyTemplate(story) {
       </div>
       <p class="story-meta">Par ${escapeHtml(story.authorUsername)} · ${formatDate(story.createdAt)}</p>
       <p>${escapeHtml(story.content).replace(/\n/g, "<br>")}</p>
-      <button class="btn like-btn ${liked ? "is-liked" : ""}" data-like-id="${story.id}">
-        ❤️ J'aime (${likedBy.length})
+      ${canModerateLikes ? `<button class="btn btn-ghost" data-clear-likes-id="${story.id}">Vider les likes</button>` : ""}
+      <button class="btn like-btn ${liked ? "is-liked" : ""}" data-like-id="${story.id}" aria-label="J'aime">
+        ❤️
       </button>
     </article>
   `;
@@ -407,7 +474,7 @@ async function toggleLike(storyId) {
   }
 
   if (state.useLocalMode) {
-    const stories = JSON.parse(localStorage.getItem("kh_stories") || "[]");
+    const stories = JSON.parse(localStorage.getItem(STORIES_STORAGE_KEY) || "[]");
     const index = stories.findIndex((s) => s.id === storyId);
     if (index < 0) return;
 
@@ -415,13 +482,13 @@ async function toggleLike(storyId) {
     const alreadyLiked = likedBy.includes(state.user.id);
     stories[index].likedBy = alreadyLiked ? likedBy.filter((id) => id !== state.user.id) : [...likedBy, state.user.id];
 
-    localStorage.setItem("kh_stories", JSON.stringify(stories));
+    localStorage.setItem(STORIES_STORAGE_KEY, JSON.stringify(stories));
     state.stories = stories.sort((a, b) => b.createdAt - a.createdAt);
     renderStories();
     return;
   }
 
-  const ref = doc(db, "stories", storyId);
+  const ref = doc(db, STORIES_COLLECTION, storyId);
   await runTransaction(db, async (transaction) => {
     const snap = await transaction.get(ref);
     if (!snap.exists()) return;
@@ -437,11 +504,11 @@ async function toggleLike(storyId) {
 
 function subscribeStories() {
   if (state.useLocalMode) {
-    state.stories = JSON.parse(localStorage.getItem("kh_stories") || "[]").sort((a, b) => b.createdAt - a.createdAt);
+    state.stories = JSON.parse(localStorage.getItem(STORIES_STORAGE_KEY) || "[]").sort((a, b) => b.createdAt - a.createdAt);
     renderStories();
 
     window.addEventListener("storage", (event) => {
-      if (event.key === "kh_stories") {
+      if (event.key === STORIES_STORAGE_KEY) {
         state.stories = JSON.parse(event.newValue || "[]").sort((a, b) => b.createdAt - a.createdAt);
         renderStories();
       }
@@ -449,7 +516,7 @@ function subscribeStories() {
     return;
   }
 
-  const storiesQuery = query(collection(db, "stories"), orderBy("createdAt", "desc"));
+  const storiesQuery = query(collection(db, STORIES_COLLECTION), orderBy("createdAt", "desc"));
   onSnapshot(storiesQuery, (snapshot) => {
     state.stories = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
     renderStories();
@@ -506,6 +573,7 @@ function escapeHtml(value) {
 
 async function init() {
   state.user = getSession();
+  if (state.user && !state.user.role) state.user.role = "user";
   await loadProfile();
   renderAccount();
   subscribeStories();
