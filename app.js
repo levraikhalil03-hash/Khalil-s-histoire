@@ -22,6 +22,9 @@ const state = {
   storyToDelete: null,
 };
 
+const STORIES_COLLECTION = "stories_fresh_start";
+const STORIES_STORAGE_KEY = "kh_stories_fresh_start";
+
 let db;
 if (!state.useLocalMode) {
   const app = initializeApp(window.__FIREBASE_CONFIG__);
@@ -105,7 +108,7 @@ storyForm.addEventListener("submit", async (event) => {
   if (!title || !content) return;
 
   if (state.useLocalMode) {
-    const stories = JSON.parse(localStorage.getItem("kh_stories") || "[]");
+    const stories = JSON.parse(localStorage.getItem(STORIES_STORAGE_KEY) || "[]");
     stories.push({
       id: crypto.randomUUID(),
       title,
@@ -115,11 +118,11 @@ storyForm.addEventListener("submit", async (event) => {
       createdAt: Date.now(),
       likedBy: [],
     });
-    localStorage.setItem("kh_stories", JSON.stringify(stories));
+    localStorage.setItem(STORIES_STORAGE_KEY, JSON.stringify(stories));
     state.stories = stories.sort((a, b) => b.createdAt - a.createdAt);
     renderStories();
   } else {
-    await addDoc(collection(db, "stories"), {
+    await addDoc(collection(db, STORIES_COLLECTION), {
       title,
       content,
       uid: state.user.id,
@@ -172,20 +175,20 @@ async function deleteStory(storyId) {
   if (!state.user) return;
 
   if (state.useLocalMode) {
-    const stories = JSON.parse(localStorage.getItem("kh_stories") || "[]");
+    const stories = JSON.parse(localStorage.getItem(STORIES_STORAGE_KEY) || "[]");
     const target = stories.find((story) => story.id === storyId);
     if (!target || target.uid !== state.user.id) {
       return;
     }
 
     const filtered = stories.filter((story) => story.id !== storyId);
-    localStorage.setItem("kh_stories", JSON.stringify(filtered));
+    localStorage.setItem(STORIES_STORAGE_KEY, JSON.stringify(filtered));
     state.stories = filtered.sort((a, b) => b.createdAt - a.createdAt);
     renderStories();
     return;
   }
 
-  const ref = doc(db, "stories", storyId);
+  const ref = doc(db, STORIES_COLLECTION, storyId);
   const snap = await getDoc(ref);
   if (!snap.exists()) return;
 
@@ -374,8 +377,8 @@ function storyTemplate(story) {
       </div>
       <p class="story-meta">Par ${escapeHtml(story.authorUsername)} · ${formatDate(story.createdAt)}</p>
       <p>${escapeHtml(story.content).replace(/\n/g, "<br>")}</p>
-      <button class="btn like-btn ${liked ? "is-liked" : ""}" data-like-id="${story.id}">
-        ❤️ J'aime (${likedBy.length})
+      <button class="btn like-btn ${liked ? "is-liked" : ""}" data-like-id="${story.id}" aria-label="J'aime">
+        ❤️
       </button>
     </article>
   `;
@@ -407,7 +410,7 @@ async function toggleLike(storyId) {
   }
 
   if (state.useLocalMode) {
-    const stories = JSON.parse(localStorage.getItem("kh_stories") || "[]");
+    const stories = JSON.parse(localStorage.getItem(STORIES_STORAGE_KEY) || "[]");
     const index = stories.findIndex((s) => s.id === storyId);
     if (index < 0) return;
 
@@ -415,13 +418,13 @@ async function toggleLike(storyId) {
     const alreadyLiked = likedBy.includes(state.user.id);
     stories[index].likedBy = alreadyLiked ? likedBy.filter((id) => id !== state.user.id) : [...likedBy, state.user.id];
 
-    localStorage.setItem("kh_stories", JSON.stringify(stories));
+    localStorage.setItem(STORIES_STORAGE_KEY, JSON.stringify(stories));
     state.stories = stories.sort((a, b) => b.createdAt - a.createdAt);
     renderStories();
     return;
   }
 
-  const ref = doc(db, "stories", storyId);
+  const ref = doc(db, STORIES_COLLECTION, storyId);
   await runTransaction(db, async (transaction) => {
     const snap = await transaction.get(ref);
     if (!snap.exists()) return;
@@ -437,11 +440,11 @@ async function toggleLike(storyId) {
 
 function subscribeStories() {
   if (state.useLocalMode) {
-    state.stories = JSON.parse(localStorage.getItem("kh_stories") || "[]").sort((a, b) => b.createdAt - a.createdAt);
+    state.stories = JSON.parse(localStorage.getItem(STORIES_STORAGE_KEY) || "[]").sort((a, b) => b.createdAt - a.createdAt);
     renderStories();
 
     window.addEventListener("storage", (event) => {
-      if (event.key === "kh_stories") {
+      if (event.key === STORIES_STORAGE_KEY) {
         state.stories = JSON.parse(event.newValue || "[]").sort((a, b) => b.createdAt - a.createdAt);
         renderStories();
       }
@@ -449,7 +452,7 @@ function subscribeStories() {
     return;
   }
 
-  const storiesQuery = query(collection(db, "stories"), orderBy("createdAt", "desc"));
+  const storiesQuery = query(collection(db, STORIES_COLLECTION), orderBy("createdAt", "desc"));
   onSnapshot(storiesQuery, (snapshot) => {
     state.stories = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
     renderStories();
