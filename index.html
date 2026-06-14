@@ -3,99 +3,72 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Khalil's Histoire</title>
+    <title>K-Global</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <div class="space-bg"></div>
+    <div class="nebula" aria-hidden="true"></div>
     <div class="stars" aria-hidden="true"></div>
 
     <header class="topbar glass">
-      <h1>Khalil's Histoire</h1>
-      <button id="postStoryBtn" class="btn btn-primary">Poster une histoire</button>
+      <a class="brand" href="#home" aria-label="Retour à l'accueil K-Global">
+        <span class="brand-mark">K</span>
+        <span>
+          <strong>K-Global</strong>
+          <small>Recherche cosmique propulsée par Google</small>
+        </span>
+      </a>
+      <nav class="toplinks" aria-label="Navigation principale">
+        <a href="#home">Accueil</a>
+        <a href="#how-it-works">Comment ça marche</a>
+      </nav>
     </header>
 
-    <main class="layout">
-      <nav class="tabs glass" role="tablist" aria-label="Sections">
-        <button class="tab is-active" data-tab="home" role="tab" aria-selected="true">Accueil</button>
-        <button class="tab" data-tab="account" role="tab" aria-selected="false">Mon compte</button>
-        <button class="tab" data-tab="my-stories" role="tab" aria-selected="false">Mes histoires</button>
-      </nav>
+    <main id="home" class="browser-shell glass">
+      <section class="hero" aria-labelledby="hero-title">
+        <p class="eyebrow">Nouveau navigateur nébuleux</p>
+        <h1 id="hero-title">K-Global</h1>
+        <p class="hero-text">
+          Tape une recherche, K-Global prépare une page de résultats inspirée de Google. Clique sur un résultat pour partir sur Google, puis utilise le bouton retour de ton navigateur pour revenir ici.
+        </p>
 
-      <section id="home" class="panel glass is-visible" role="tabpanel">
-        <h2>Toutes les histoires</h2>
-        <p class="muted">Toutes les histoires postées par les utilisateurs apparaissent ici en temps réel.</p>
-        <div id="allStories" class="story-list"></div>
+        <form id="searchForm" class="search-card" role="search">
+          <label class="sr-only" for="searchInput">Recherche K-Global</label>
+          <input id="searchInput" type="search" autocomplete="off" placeholder="Recherche sur K-Global..." required />
+          <button type="submit">Rechercher</button>
+        </form>
+
+        <div class="quick-searches" aria-label="Recherches rapides">
+          <button type="button" data-query="actualités espace">actualités espace</button>
+          <button type="button" data-query="jeux gratuits">jeux gratuits</button>
+          <button type="button" data-query="météo aujourd'hui">météo aujourd'hui</button>
+        </div>
       </section>
 
-      <section id="account" class="panel glass" role="tabpanel">
-        <h2>Mon compte</h2>
-        <div id="accountCard" class="account-card"></div>
-        <h3>Mes histoires publiées</h3>
-        <div id="accountStories" class="story-list"></div>
-      </section>
-
-      <section id="my-stories" class="panel glass" role="tabpanel">
-        <h2>Mes histoires</h2>
-        <div id="myStories" class="story-list"></div>
+      <section id="resultsPanel" class="results-panel" aria-live="polite">
+        <div class="empty-state">
+          <span>🌌</span>
+          <h2>Prêt à explorer le web</h2>
+          <p>Les résultats s'afficheront ici après ta recherche.</p>
+        </div>
       </section>
     </main>
 
-    <dialog id="authDialog" class="modal">
-      <form id="authForm" class="modal-content">
-        <h3>Connectez-vous</h3>
-        <label>
-          Pseudo
-          <input id="authUsername" required minlength="3" maxlength="32" />
-        </label>
-        <label>
-          Mot de passe
-          <input id="authPassword" type="password" required minlength="4" maxlength="64" />
-        </label>
-        <p id="authError" class="error" role="alert"></p>
-        <menu>
-          <button class="btn btn-primary" type="submit">Se connecter</button>
-          <button id="registerBtn" class="btn btn-ghost" type="button">Créer un compte</button>
-          <button id="closeAuthBtn" class="btn btn-ghost" type="button">Fermer</button>
-        </menu>
-      </form>
-    </dialog>
+    <section id="how-it-works" class="info-grid">
+      <article class="glass info-card">
+        <h2>1. Tu cherches</h2>
+        <p>K-Global transforme ta phrase en recherche Google et affiche une liste de raccourcis clairs sur notre page.</p>
+      </article>
+      <article class="glass info-card">
+        <h2>2. Tu cliques</h2>
+        <p>Le clic ouvre Google avec ta recherche ou un résultat Google direct, comme demandé.</p>
+      </article>
+      <article class="glass info-card">
+        <h2>3. Tu reviens</h2>
+        <p>Pour sortir de Google, appuie sur retour dans ton navigateur : tu reviens sur K-Global.</p>
+      </article>
+    </section>
 
-    <dialog id="storyDialog" class="modal">
-      <form id="storyForm" class="modal-content">
-        <h3>Nouvelle histoire</h3>
-        <label>
-          Titre
-          <input id="storyTitle" required maxlength="120" />
-        </label>
-        <label>
-          Histoire
-          <textarea id="storyContent" required rows="10" placeholder="Écrivez votre histoire..."></textarea>
-        </label>
-        <menu>
-          <button class="btn btn-primary" type="submit">Publier</button>
-          <button id="cancelStoryBtn" class="btn btn-ghost" type="button">Annuler</button>
-        </menu>
-      </form>
-    </dialog>
-
-
-    <dialog id="deleteDialog" class="modal">
-      <div class="modal-content">
-        <h3>Vous voulez vraiment supprimer ?</h3>
-        <p>Cette action est définitive.</p>
-        <menu>
-          <button id="confirmDeleteBtn" class="btn btn-primary" type="button">Oui, supprimer</button>
-          <button id="cancelDeleteBtn" class="btn btn-ghost" type="button">Annuler</button>
-        </menu>
-      </div>
-    </dialog>
-
-    <div id="publishEmoji" class="publish-emoji" aria-live="polite">🎉</div>
-
-    <script>
-      window.__FIREBASE_CONFIG__ = window.__FIREBASE_CONFIG__ || null;
-    </script>
     <script type="module" src="app.js"></script>
   </body>
 </html>
